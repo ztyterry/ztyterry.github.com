@@ -1,0 +1,440 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="智能社 - zhinengshe.com" />
+<meta name="copyright" content="智能社 - zhinengshe.com" />
+<meta name="description" content="智能社是一家专注于web前端开发技术的公司，目前主要提供JavaScript培训和HTML5培训两项服务，同时还推出了大量javascript基础知识教程，智能课堂为你带来全新的学习方法和快乐的学习体验。" />
+<title>智能社— http://www.zhinengshe.com</title>
+<style>
+*{margin:0; padding:0; text-decoration:none; list-style:none;}
+#page1{display:block;}
+.user_info_box{width:400px;height:300px; border:1px solid #000; border-radius:10px; background:#f1f1f1; margin:150px auto; position:relative; top:0; left:0;}
+.face_show_box{width:90px; height:90px; border:2px solid #ccc; border-radius:5px; position:absolute; left:50%; margin-left:-45px; top:-45px;}
+.face_show_box a{position:absolute; width:30px; height:30px; line-height:30px; text-align:center; background:rgba(0,0,0,0.5); top:50%; margin-top:-10px; color:#fff; font-weight:bold; display:none;}
+.face_show_box .prev{left:0;}
+.face_show_box .next{right:0;}
+.user_info_form{width:250px; margin:100px auto; text-align:center; font-size:18px; font-family:微软雅黑;}
+.user_info_form p{ padding:10px 0;}
+.user_info_form p a{display:inline-block; width:80px; height:35px; background:#06C; color:#fff; line-height:35px; text-align:center;}
+#page2{display:none;}
+.chat_box{width:800px; height:500px; background:#f1f1f1; border:1px solid #000; border-radius:5px; margin:80px auto;}
+.chat_header{ height:50px; border-bottom:1px solid #000; position:relative; top:0; left:0;}
+.chat_header .face_show{width:90px; height:90px; border:1px solid #ccc; border-radius:50%; overflow:hidden;  position:absolute; left:50px; top:-45px;}
+.chat_header a{position:absolute; right:20px; top:15px; color:#06C; font-weight:bold;}
+.chat_fn_box{overflow:hidden; height:450px;}
+.chat_l{float:left; width:498px; height:100%; position:relative; top:0; left:0;}
+.msg_box{width:498px; height:300px; position:relative; top:0; left:0; border-bottom:1px solid #000;}
+.msg_box .msg_list{width:478px; height:300px; position:relative; top:0; left:0; overflow:hidden;}
+.msg_box .msg_list ul{position:absolute; top:0; left:0;}
+.msg_list ul li{margin:10px 0;}
+.send_box{width:498px; height:150px; position:relative; top:0; left:0;}
+.send_box .msg_txt{width:100%; height:120px;}
+.send_box .send_btn{ position:absolute; bottom:5px; right:10px; width:50px; height:20px; background:#06C; text-align:center; color:#fff; line-height:20px;}
+.chat_r{float:right; width:300px; height:100%; border-left:2px solid #666; position:relative ;top:0; left:0;}
+.user_list{position:absolute; top:0; left:0; width:280px; height:100%; overflow:hidden;}
+.user_list ul{position:absolute; top:0; left:0;}
+.user_list ul li{height:30px; line-height:30px;  margin:5px 0 5px 10px;}
+.user_list ul li img{vertical-align:middle;}
+.user_list ul li strong{padding-left:10px;}
+.bar_box{position:absolute; top:0; right:0; width:20px; height:100%; background:#ccc;}
+.bar{width:20px; height:50px; background:#666; position:absolute; top:0; left:0;}
+
+</style>
+<script src="jsonp.js"></script>
+<script src="wheel.js"></script>
+<script>
+window.onload=function(){
+	var oPage1 = document.getElementById('page1');
+	var oPage2 = document.getElementById('page2');
+	var oFaceShowBox = document.getElementById('face_show_box');
+	var oFace = oFaceShowBox.children[0];
+	var oPrev = oFaceShowBox.children[1];
+	var oNext = oFaceShowBox.children[2];
+	var oUser = document.getElementById('username');
+	var oPass = document.getElementById('pass');
+	var oAddBtn = document.getElementById('add_btn');
+	var oLoginBtn = document.getElementById('login_btn');
+	var oLogoutBtn = document.getElementById('logout_btn');
+	var oFaceShow = document.getElementById('face_show');
+	var oUserList = document.getElementById('user_list');
+	var oUserUl = oUserList.children[0];
+	var oUserBarBox = document.getElementById('user_bar_box');
+	var oUserBar = document.getElementById('user_bar');
+	var oMsgList = document.getElementById('msg_list');
+	var oMsgUl = oMsgList.children[0];
+	var oMsgBarBox = document.getElementById('msg_bar_box');
+	var oMsgBar = document.getElementById('msg_bar');
+	var oMsgTxt = document.getElementById('msg_txt');
+	var oSendBtn = document.getElementById('send_btn');
+	var token = null;
+	var URL = 'http://zhinengshe.com/exercise/im/api.php';
+	var iFaceNow = oFace.alt;
+	var uname = null;
+	var maxID = null;
+	var timer = null;
+	oFaceShowBox.onmouseover=function(){
+		oPrev.style.display='block';
+		oNext.style.display='block';
+	};
+	oFaceShowBox.onmouseout=function(){
+		oPrev.style.display='none';
+		oNext.style.display='none';
+	};
+	oNext.onclick=function(){
+		iFaceNow++;
+		if(iFaceNow>8)iFaceNow=1;
+		oFace.src='imgs/'+iFaceNow+'.jpg';
+		oFace.alt=iFaceNow;
+	};
+	oPrev.onclick=function(){
+		iFaceNow--;
+		if(iFaceNow<1)iFaceNow=8;
+		oFace.src='imgs/'+iFaceNow+'.jpg';
+		oFace.alt=iFaceNow;
+	};
+	
+	//补零
+	function toDou(iNum){
+		return iNum<10?'0'+iNum:''+iNum;
+	}
+	
+	//获取人能看懂的时间
+	function getPostTime(time){
+		var oDate = new Date(time);
+		return oDate.getFullYear()+'-'+toDou(oDate.getMonth()+1)+'-'+toDou(oDate.getDate())+' '+toDou(oDate.getHours())+':'+toDou(oDate.getMinutes())+':'+toDou(oDate.getSeconds());
+	}
+	
+	//注册
+	oAddBtn.onclick=function(){
+		if(oUser.value==''||oPass.value==''){
+			alert('请输入用户名或密码');
+			return;
+		}else{
+			jsonp({
+				url:URL,
+				data:{
+					a:'reg',
+					user:oUser.value,
+					pass:oPass.value,
+					face:iFaceNow
+				},
+				success:function(json){
+					if(!json.err){
+						alert(json.msg);
+					}else{
+						alert('注册失败:'+json.msg);
+					}
+				},
+				error:function(e){
+					alert('失败:'+e);
+				}
+			});
+		}
+	};
+	
+	oSendBtn.onclick=function(){
+		if(oMsgTxt.value==''){
+			return;
+		}
+		jsonp({
+			url:URL,
+			data:{
+				a:'snd_msg',
+				content:oMsgTxt.value,
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					var oLi = createMsg(uname,json.time,oMsgTxt.value);
+					oMsgUl.appendChild(oLi);
+					oMsgUl.style.top  = -(oMsgUl.scrollHeight-oMsgList.offsetHeight)+'px';
+					oMsgBar.style.top = oMsgBarBox.offsetHeight - oMsgBar.offsetHeight+'px';
+					oMsgTxt.value='';
+					maxID = json.ID;
+				}else{
+					alert('发言失败');
+				}
+			},
+			error:function(e){
+				alert('失败:'+e);
+			}
+		});
+	};
+	
+	//登录
+	oLoginBtn.onclick=function(){
+		if(oUser.value==''||oPass.value==''){
+			alert('请输入用户名或密码');
+			return;
+		}
+		jsonp({
+			url:URL,
+			data:{
+				a:'lgn',
+				user:oUser.value,
+				pass:oPass.value
+			},
+			success:function(json){
+				if(!json.err){
+					alert(json.msg);
+					oFaceShow.src='imgs/'+json.face+'.jpg';
+					token = json.token;
+					uname = oUser.value;
+					oUser.value='';
+					oPass.value='';
+					oPage1.style.display='none';
+					oPage2.style.display='block';
+					getAllUser();
+					getOldMsg();
+					getUpdate();
+				}else{
+					alert('失败:'+json.msg);
+				}
+			},
+			error:function(e){
+				alert('失败:'+e);
+			}
+		});
+	};
+	//获取所有用户
+	function getAllUser(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'get_user_list',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					var arr = json.data;
+					for(var i=0;i<arr.length;i++){
+						var oLi = document.createElement('li');
+						oLi.innerHTML='<img src="imgs/'+arr[i].face+'.jpg" width=30 /><strong>'+arr[i].username+'</strong>';
+						oUserUl.appendChild(oLi);
+					}
+					addDrag(oUserList,oUserUl,oUserBarBox,oUserBar);
+				}else{
+					alert('获取失败');
+				}
+			},
+			error:function(e){
+				alert('失败:'+e);
+			}
+		});
+	}
+	//获取所有消息
+	function getOldMsg(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'get_msg',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					var arr = json.data;
+					for(var i=0;i<arr.length;i++){
+						var oLi = createMsg(arr[i].username,arr[i].post_time*1000,arr[i].content);
+						oMsgUl.appendChild(oLi);
+						maxID = arr[i].ID;
+					}
+					addDrag(oMsgList,oMsgUl,oMsgBarBox,oMsgBar);
+					
+				}else{
+					alert('获取历史消息失败');
+				}
+			},
+			error:function(e){
+				alert('失败:'+e);
+			}
+		});
+	}
+	function createMsg(name,time,content){
+		var oLi =document.createElement('li');
+		oLi.innerHTML='<strong>'+name+'</strong><span>'+getPostTime(time)+'</span><p>'+content+'</p>';
+		return oLi;
+	}
+	
+	//退出登录
+	oLogoutBtn.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'logout',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					alert(json.msg);
+					oPage2.style.display='none';
+					oPage1.style.display='block';
+					oMsgUl.innerHTML='';
+					oUserUl.innerHTML='';
+					clearInterval(timer);
+				}else{
+					alert('失败'+json.msg);
+				}
+			},
+			error:function(e){
+				alert('失败:'+e);
+			}
+		});
+	};
+	
+	//拖拽+滚轮
+	function addDrag(oListBox,oList,oBarBox,oBar){
+		oList.style.top  = -(oList.scrollHeight-oListBox.offsetHeight)+'px';
+		oBar.style.top = oBarBox.offsetHeight - oBar.offsetHeight+'px';
+		oBar.onmousedown=function(ev){
+			var oEvent = ev||event;
+			var disY = oEvent.clientY-oBar.offsetTop;
+			document.onmousemove=function(ev){
+				var oEvent = ev||event;
+				var t = oEvent.clientY-disY;
+				barMove(t);
+			};
+			document.onmouseup=function(){
+				document.onmousemove=null;
+				document.onmouseup=null;
+				oBar.releaseCapture&&oBar.releaseCapture();
+			};
+			oBar.setCapture&&oBar.setCapture();
+			return false;
+		};
+		function barMove(t){
+			if(t<0){
+				t=0;
+			}else if(t>oBarBox.offsetHeight-oBar.offsetHeight){
+				t = oBarBox.offsetHeight-oBar.offsetHeight;
+			}
+			oBar.style.top = t+'px';
+			var scale = t/(oBarBox.offsetHeight-oBar.offsetHeight);
+			oList.style.top = -(oList.scrollHeight-oListBox.offsetHeight)*scale+'px';
+		}
+		addWheel(oListBox,function(bDir){
+			var t = oBar.offsetTop;
+			if(bDir){
+				t+=10;
+			}else{
+				t-=10;
+			}
+			barMove(t);
+		});
+	}
+	
+	//获取更新
+	function getUpdate(){
+		timer = setInterval(function(){
+			jsonp({
+				url:URL,
+				data:{
+					a:'get_msg_n',
+					n:maxID,
+					token:token
+				},
+				success:function(json){
+					if(!json.err){
+						var arr = json.data;
+						for(var i=0;i<arr.length;i++){
+							var oLi = createMsg(arr[i].username,arr[i].post_time*1000,arr[i].content);
+							oMsgUl.appendChild(oLi);
+							maxID = arr[i].ID;
+							oMsgUl.style.top  = -(oMsgUl.scrollHeight-oMsgList.offsetHeight)+'px';
+							oMsgBar.style.top = oMsgBarBox.offsetHeight - oMsgBar.offsetHeight+'px';
+						}
+						
+					}else{
+						alert('获取更新失败');
+					}
+				},
+				error:function(e){
+					alert('失败:'+e);
+				}
+			});
+		},10000);
+	}
+	
+};
+</script>
+</head>
+
+<body>
+<div id="page1">
+	<div class="user_info_box">
+		<div class="face_show_box" id="face_show_box">
+			<img src="imgs/1.jpg" alt="1" />
+			<a href="javascript:;" class="prev">&lt;</a>
+			<a href="javascript:;" class="next">&gt;</a>
+		</div>
+		<div class="user_info_form">
+			<p><label for="username">用户名:</label><input type="text" id="username" /></p>
+			<p><label for="pass">密&nbsp;&nbsp;&nbsp;&nbsp;码:</label><input type="password" id="pass" /></p>
+			<p>
+				<a href="javascript:;" id="add_btn">注册</a>
+				<a href="javascript:;" id="login_btn">登录</a>
+			</p>
+		</div>
+	</div>
+</div>
+<div id="page2">
+	<div class="chat_box">
+		<div class="chat_header">
+			<div class="face_show">
+				<img src="imgs/1.jpg" id="face_show"/>
+			</div>
+			<a href="javascript:;" id="logout_btn">退出</a>
+		</div>
+		<div class="chat_fn_box">
+			<div class="chat_l">
+				<div class="msg_box">
+					<div class="msg_list" id="msg_list">
+						<ul>
+							<!--<li>
+								<strong>失忆</strong>
+								<span>2015-12-30 00:00:00</span>
+								<p>今天我布局了。</p>
+							</li>-->
+						</ul>
+					</div>
+					<div class="bar_box" id="msg_bar_box">
+						<div class="bar" id="msg_bar"></div>
+					</div>
+				</div>
+				<div class="send_box">
+					<textarea class="msg_txt" id="msg_txt"></textarea>
+					<a href="javascript:;" class="send_btn" id="send_btn">发送</a>
+				</div>
+			</div>
+			<div class="chat_r">
+				<div class="user_list" id="user_list">
+					<ul>
+						<!--<li><img src="imgs/1.jpg" width=30 /><strong>湿意</strong></li>-->
+					</ul>
+				</div>
+				<div class="bar_box" id="user_bar_box">
+					<div class="bar" id="user_bar"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

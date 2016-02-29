@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="智能社 - zhinengshe.com">
+<meta name="copyright" content="智能社 - zhinengshe.com">
+<title>智能社 - www.zhinengshe.com</title>
+<style>
+*{margin:0; padding:0;}
+.txt{width:200px;height:30px;margin-top:20px;}
+.button{width:70px;height:30px;}
+#box{width:300px;margin:50px auto;}
+</style>
+<script>
+window.onload=function(){
+	var oEmail = document.getElementById('email');
+	var oBtn1 = document.getElementById('btn1');
+	var oGH = document.getElementById('GH');
+	var oBtn2 = document.getElementById('btn2');
+	var oNum = document.getElementById('num');
+	var oBtn3 = document.getElementById('btn3');
+	oBtn1.onclick=function(){
+		var reg = /^[\w\-]+@[a-zA-Z\d\-]+(\.\w{2,8}){1,2}$/gi;
+		alert(reg.test(oEmail.value));
+	};
+	oBtn2.onclick=function(){
+		var reg = /^0[1-9]\d{1,2}\-[1-9]\d{6,7}$/g;
+		alert(reg.test(oGH.value));
+	};
+	oBtn3.onclick=function(){
+		var reg = /^\d{14}(\d{3})?[\dxX]$/g;
+		alert(reg.test(oNum.value));
+	};
+};
+</script>
+</head>
+
+<body>
+<div id="box">
+	<input type="text" id="email" / class="txt">
+	<input type="button" value="邮箱校验" id="btn1" class="button" /></br>
+	<input type="text" id="GH" / class="txt">
+	<input type="button" value="固定电话校验" id="btn2" class="button"/></br>
+	<input type="text" id="num" class="txt"/>
+	<input type="button" value="身份证校验" id="btn3" class="button"/>
+</div>
+</body>
+</html>
